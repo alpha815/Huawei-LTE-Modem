@@ -1,0 +1,363 @@
+[
+    {
+        "id": "ccf2e3b597d852b0",
+        "type": "tab",
+        "label": "Huawei Web API",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "6e215f49.aadfe",
+        "type": "inject",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 220,
+        "wires": [
+            [
+                "a40a61b15d00928d"
+            ]
+        ]
+    },
+    {
+        "id": "2bd2ae1f.24ec22",
+        "type": "http request",
+        "z": "ccf2e3b597d852b0",
+        "name": "Monitoring Status",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.1.1/api/monitoring/status",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 830,
+        "y": 160,
+        "wires": [
+            [
+                "944bd4f61e240aa6"
+            ]
+        ]
+    },
+    {
+        "id": "e74c77e60cdab6d1",
+        "type": "function",
+        "z": "ccf2e3b597d852b0",
+        "name": "request",
+        "func": "let token = msg.payload.response.TokInfo[0]  // token from XML\nlet sessionID = msg.payload.response.SesInfo[0]  // sessionID from XML\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded; charset=UTF-8\",\n    \"X-Requested-With\": \"XMLHttpRequest\",\n    \"__RequestVerificationToken\": token,\n    \"Cookie\" : sessionID\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 220,
+        "wires": [
+            [
+                "a8c0157c0f0736f6"
+            ]
+        ]
+    },
+    {
+        "id": "a40a61b15d00928d",
+        "type": "http request",
+        "z": "ccf2e3b597d852b0",
+        "name": "Ses Tok Info",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.1.1/api/webserver/SesTokInfo",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 310,
+        "y": 220,
+        "wires": [
+            [
+                "fd99a01ab6dfe1cf"
+            ]
+        ]
+    },
+    {
+        "id": "fd99a01ab6dfe1cf",
+        "type": "xml",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 490,
+        "y": 220,
+        "wires": [
+            [
+                "e74c77e60cdab6d1"
+            ]
+        ]
+    },
+    {
+        "id": "a8c0157c0f0736f6",
+        "type": "http request",
+        "z": "ccf2e3b597d852b0",
+        "name": "Traffic Statistics",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.1.1/api/monitoring/traffic-statistics/r/nConnection",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 840,
+        "y": 220,
+        "wires": [
+            [
+                "d8dfb072bf900bcf"
+            ]
+        ]
+    },
+    {
+        "id": "d8dfb072bf900bcf",
+        "type": "xml-converter",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "ignorenamespace": true,
+        "autoinline": true,
+        "multithread": true,
+        "x": 1060,
+        "y": 220,
+        "wires": [
+            [
+                "1b52e58af0b07456"
+            ]
+        ]
+    },
+    {
+        "id": "fb375dc0af87d5fe",
+        "type": "debug",
+        "z": "ccf2e3b597d852b0",
+        "name": "Monitoring Status",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1490,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "52a29d09130d0dcc",
+        "type": "debug",
+        "z": "ccf2e3b597d852b0",
+        "name": "Traffic Statistics",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1480,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "10fb2da889a9677d",
+        "type": "influxdb batch",
+        "z": "ccf2e3b597d852b0",
+        "influxdb": "eeb221fb.ab27f",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "influx batch",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1470,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "1b52e58af0b07456",
+        "type": "function",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "func": "CurrentUpload = parseFloat(msg.payload.response.CurrentUpload / 1e+6);\nCurrentDownload = parseFloat(msg.payload.response.CurrentDownload / 1e+6);\nTotalUpload = parseFloat(msg.payload.response.TotalUpload / 1e+9);\nTotalDownload = parseFloat(msg.payload.response.TotalDownload / 1e+9);\nCurrentUploadRate = parseFloat(msg.payload.response.CurrentUploadRate / 1000);\nCurrentDownloadRate = parseFloat(msg.payload.response.CurrentDownloadRate / 1000);\nCurrentConnectTime = parseFloat(msg.payload.response.CurrentConnectTime / 60);\nTotalConnectTime = parseFloat(msg.payload.response.TotalConnectTime / 3600);\n   msg.payload = [\n    {\n        measurement: \"HuaweiLTEModem\",\n        fields: {\n            Current_upload: CurrentUpload,\n            Current_doownload: CurrentDownload,\n            Upload_rate: CurrentUploadRate,\n            Download_rate:CurrentDownloadRate,\n            Total_Upload:TotalUpload,\n            Total_Download:TotalDownload,\n            Current_Connect_Time:CurrentConnectTime,\n            Total_Connect_Time:TotalConnectTime,\n        },\n    }\n        ]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 220,
+        "wires": [
+            [
+                "52a29d09130d0dcc",
+                "10fb2da889a9677d"
+            ]
+        ]
+    },
+    {
+        "id": "944bd4f61e240aa6",
+        "type": "xml-converter",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "ignorenamespace": true,
+        "autoinline": true,
+        "multithread": true,
+        "x": 1060,
+        "y": 160,
+        "wires": [
+            [
+                "de23394b4526ec72"
+            ]
+        ]
+    },
+    {
+        "id": "9e0bb1210846a6e5",
+        "type": "function",
+        "z": "ccf2e3b597d852b0",
+        "name": "request",
+        "func": "let token = msg.payload.response.TokInfo[0]  // token from XML\nlet sessionID = msg.payload.response.SesInfo[0]  // sessionID from XML\nmsg.headers = {\n    \"Content-Type\": \"application/x-www-form-urlencoded; charset=UTF-8\",\n    \"X-Requested-With\": \"XMLHttpRequest\",\n    \"__RequestVerificationToken\": token,\n    \"Cookie\" : sessionID\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 160,
+        "wires": [
+            [
+                "2bd2ae1f.24ec22"
+            ]
+        ]
+    },
+    {
+        "id": "8e78cf9d75c65452",
+        "type": "http request",
+        "z": "ccf2e3b597d852b0",
+        "name": "Ses Tok Info",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.1.1/api/webserver/SesTokInfo",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 290,
+        "y": 160,
+        "wires": [
+            [
+                "f303dd141cf7b4bb"
+            ]
+        ]
+    },
+    {
+        "id": "f303dd141cf7b4bb",
+        "type": "xml",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [
+                "9e0bb1210846a6e5"
+            ]
+        ]
+    },
+    {
+        "id": "de23394b4526ec72",
+        "type": "function",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "func": "BatteryPercent = parseInt(msg.payload.response.BatteryPercent);\nBatteryLevel = parseInt(msg.payload.response.BatteryLevel);\nCurrentWifiUser = parseInt(msg.payload.response.CurrentWifiUser);\nSignalIcon = parseInt(msg.payload.response.SignalIcon);\n   msg.payload = [\n    {\n        measurement: \"HuaweiLTEModem\",\n        fields: {\n            Battery_percent: BatteryPercent,\n            Battery_level: BatteryLevel,\n            Current_wifiUser: CurrentWifiUser,\n            Signal_icon:SignalIcon,\n        },\n    }\n        ]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1240,
+        "y": 160,
+        "wires": [
+            [
+                "fb375dc0af87d5fe",
+                "18ed710c7848856d"
+            ]
+        ]
+    },
+    {
+        "id": "18ed710c7848856d",
+        "type": "influxdb batch",
+        "z": "ccf2e3b597d852b0",
+        "influxdb": "eeb221fb.ab27f",
+        "precision": "",
+        "retentionPolicy": "",
+        "name": "influx batch",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1470,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "5c62c2e6ceb9283a",
+        "type": "complete",
+        "z": "ccf2e3b597d852b0",
+        "name": "",
+        "scope": [
+            "10fb2da889a9677d"
+        ],
+        "uncaught": false,
+        "x": 110,
+        "y": 160,
+        "wires": [
+            [
+                "8e78cf9d75c65452"
+            ]
+        ]
+    },
+    {
+        "id": "eeb221fb.ab27f",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "mydb",
+        "name": "test",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "rejectUnauthorized": true
+    }
+]
